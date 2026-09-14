@@ -1,4 +1,5 @@
 import pytest
+import requests
 
 from helpers.courier_helper import create_courier, delete_courier
 
