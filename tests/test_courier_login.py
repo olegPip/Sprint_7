@@ -21,6 +21,8 @@ class TestCourierLogin:
         assert "id" in response.json()
         assert isinstance(response.json()["id"], int)
 
+    # endpoint /api/v1/courier/login не обрабатывает запрос, в котором отсутствует password.
+    # Падающий тест здесь фиксирует дефект API. Приходи код 504.
     @pytest.mark.parametrize("field", [
         "login",
         "password"
@@ -40,6 +42,7 @@ class TestCourierLogin:
 
         assert response.status_code == 400
         assert response.json() == {
+            "code": 400,
             "message": "Недостаточно данных для входа"
         }
 
@@ -56,6 +59,7 @@ class TestCourierLogin:
 
         assert response.status_code == 404
         assert response.json() == {
+            "code": 404,
             "message": "Учетная запись не найдена"
         }
 
@@ -72,5 +76,7 @@ class TestCourierLogin:
 
         assert response.status_code == 404
         assert response.json() == {
+            "code": 404,
             "message": "Учетная запись не найдена"
         }
+
