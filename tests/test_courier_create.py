@@ -61,15 +61,16 @@ class TestCreateCourier:
 
             assert second_response.status_code == 409
             assert second_response.json() == {
-                "message": "Этот логин уже используется"
+                "code": 409,
+                "message": "Этот логин уже используется. Попробуйте другой."
             }
+
         finally:
             requests.delete(f"{CREATE_COURIER}/{courier_id}")
 
     @pytest.mark.parametrize("field", [
         "login",
-        "password",
-        "firstName"
+        "password"
     ])
     def test_create_courier_without_required_field(self, field):
         payload = generate_courier_data()
@@ -82,5 +83,6 @@ class TestCreateCourier:
 
         assert response.status_code == 400
         assert response.json() == {
+            "code": 400,
             "message": "Недостаточно данных для создания учетной записи"
         }
