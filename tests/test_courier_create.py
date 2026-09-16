@@ -1,10 +1,10 @@
 import pytest
 import requests
 
-from endpoints import CREATE_COURIER
+from endpoints import CREATE_COURIER, LOGIN_COURIER
 from helpers.courier_helper import generate_courier_data
 
-# Создать курьера
+
 class TestCreateCourier:
 
     def test_create_courier_success(self):
@@ -19,7 +19,7 @@ class TestCreateCourier:
         assert response.json() == {"ok": True}
 
         login_response = requests.post(
-            f"{CREATE_COURIER}/login",
+            LOGIN_COURIER,
             json={
                 "login": payload["login"],
                 "password": payload["password"]
@@ -44,7 +44,7 @@ class TestCreateCourier:
         assert first_response.json() == {"ok": True}
 
         login_response = requests.post(
-            f"{CREATE_COURIER}/login",
+            LOGIN_COURIER,
             json={
                 "login": payload["login"],
                 "password": payload["password"]

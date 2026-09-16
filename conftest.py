@@ -1,6 +1,7 @@
 import pytest
 import requests
 
+from endpoints import LOGIN_COURIER
 from helpers.courier_helper import create_courier, delete_courier
 
 
@@ -12,7 +13,7 @@ def courier():
     assert response.json() == {"ok": True}
 
     login_response = requests.post(
-        "https://qa-scooter.education-services.ru/api/v1/courier/login",
+        LOGIN_COURIER,
         json={
             "login": courier_data["login"],
             "password": courier_data["password"]
