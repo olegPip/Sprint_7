@@ -1,13 +1,27 @@
 import pytest
 import requests
 
-from endpoints import CREATE_COURIER, LOGIN_COURIER
+from endpoints import CREATE_COURIER
 from helpers.courier_helper import generate_courier_data
+from endpoints import (
+    DUPLICATE_COURIER_MESSAGE,
+    REQUIRED_FIELDS_MESSAGE,
+)
+
+
+@pytest.fixture
+def courier_cleanup():
+    courier_ids = []
+
+    yield courier_ids
+
+    for courier_id in courier_ids:
+        requests.delete(f"{CREATE_COURIER}/{courier_id}")
 
 
 class TestCreateCourier:
 
-    def test_create_courier_success(self):
+    def test_create_courier_success(self, courier_cleanup):
         payload = generate_courier_data()
 
         response = requests.post(
@@ -19,7 +33,7 @@ class TestCreateCourier:
         assert response.json() == {"ok": True}
 
         login_response = requests.post(
-            LOGIN_COURIER,
+            f"{CREATE_COURIER}/login",
             json={
                 "login": payload["login"],
                 "password": payload["password"]
@@ -29,10 +43,9 @@ class TestCreateCourier:
         assert login_response.status_code == 200
 
         courier_id = login_response.json()["id"]
+        courier_cleanup.append(courier_id)
 
-        requests.delete(f"{CREATE_COURIER}/{courier_id}")
-
-    def test_create_duplicate_courier(self):
+    def test_create_duplicate_courier(self, courier_cleanup):
         payload = generate_courier_data()
 
         first_response = requests.post(
@@ -44,29 +57,28 @@ class TestCreateCourier:
         assert first_response.json() == {"ok": True}
 
         login_response = requests.post(
-            LOGIN_COURIER,
+            f"{CREATE_COURIER}/login",
             json={
                 "login": payload["login"],
                 "password": payload["password"]
             }
         )
 
+        assert login_response.status_code == 200
+
         courier_id = login_response.json()["id"]
+        courier_cleanup.append(courier_id)
 
-        try:
-            second_response = requests.post(
-                CREATE_COURIER,
-                json=payload
-            )
+        second_response = requests.post(
+            CREATE_COURIER,
+            json=payload
+        )
 
-            assert second_response.status_code == 409
-            assert second_response.json() == {
-                "code": 409,
-                "message": "Этот логин уже используется. Попробуйте другой."
-            }
-
-        finally:
-            requests.delete(f"{CREATE_COURIER}/{courier_id}")
+        assert second_response.status_code == 409
+        assert second_response.json() == {
+            "code": 409,
+            "message": DUPLICATE_COURIER_MESSAGE
+        }
 
     @pytest.mark.parametrize("field", [
         "login",
@@ -84,5 +96,5 @@ class TestCreateCourier:
         assert response.status_code == 400
         assert response.json() == {
             "code": 400,
-            "message": "Недостаточно данных для создания учетной записи"
+            "message": REQUIRED_FIELDS_MESSAGE
         }
