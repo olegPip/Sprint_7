@@ -9,3 +9,5 @@ DUPLICATE_COURIER_MESSAGE = "Этот логин уже используется
 REQUIRED_FIELDS_MESSAGE = (
     "Недостаточно данных для создания учетной записи"
 )
+
+ACCEPT_ORDER = f"{BASE_URL}/api/v1/orders/accept"
